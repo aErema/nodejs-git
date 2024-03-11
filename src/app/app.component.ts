@@ -1,13 +1,27 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+import {gitInfoService} from "./service/git-info.service";
+import {combineLatest} from "rxjs";
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
-  title = 'branch-show-app';
+export class AppComponent implements OnInit {
+  branches: any[] = [];
+
+  constructor(private git: gitInfoService) {
+  }
+
+  ngOnInit() {
+    combineLatest([this.git.getCommitInfo(), this.git.getBranchInfo()]).subscribe(([commit, res]) => {
+      this.branches = res.map(br => {
+        return {
+          epicName: br.name.split('/')[0],
+          name: br.name.split('/')[1] ? br.name.split('/')[1]: br.name,
+        }
+      });
+      console.log(this.branches);
+    })
+  }
 }
